@@ -60,6 +60,22 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 		JsonElement element = parser.parse(message);
 		String device_id = element.getAsJsonObject().get("oisems_id").getAsString();
 		String command = element.getAsJsonObject().get("cmd").getAsString();
+		if (command.equals("SENDMESSAGE")) {
+			System.out.println("SENDMESSAGE");
+			//Check if it has a valid session
+			DeviceInfo device = node.deviceList.get(device_id);
+			String session_id = element.getAsJsonObject().get("session_id").getAsString();
+			if (device.getSessionId().equals(session_id)) {
+				byte message_bytes[] = Base64.decodeBase64(element.getAsJsonObject().get("message").getAsString());
+				
+				OisemsMessage msg = new OisemsMessage();
+				msg.fromBytesPartial(message_bytes);
+				System.out.println("Sending to " + msg.getRecipient());
+				
+				//Check if message is available locally
+				
+			}
+		} else
 		if (command.equals("REGISTER")) {
 			System.out.println("REGISTER");
 			String session_id = DigestUtils.sha256Hex(Double.toString(Math.random()));
