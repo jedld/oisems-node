@@ -42,9 +42,9 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 	}
 
 	@Override
-	public void onClose(WebSocket arg0, int arg1, String arg2, boolean arg3) {
-		// TODO Auto-generated method stub
-		
+	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+		System.out.println("Device disconnected.");
+		node.removeDeviceBySocket(conn);
 	}
 
 	@Override
@@ -66,14 +66,22 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 			DeviceInfo device = node.deviceList.get(device_id);
 			String session_id = element.getAsJsonObject().get("session_id").getAsString();
 			if (device.getSessionId().equals(session_id)) {
-				byte message_bytes[] = Base64.decodeBase64(element.getAsJsonObject().get("message").getAsString());
+				String msgb64 = element.getAsJsonObject().get("message").getAsString();
+				byte message_bytes[] = Base64.decodeBase64(msgb64);
 				
 				OisemsMessage msg = new OisemsMessage();
 				msg.fromBytesPartial(message_bytes);
 				System.out.println("Sending to " + msg.getRecipient());
 				
 				//Check if message is available locally
-				
+				DeviceInfo dev_info = node.getDevice(msg.getRecipient());
+				if (!dev_info.getSocket().isClosed()) {
+					WebSocket recipient = dev_info.getSocket();
+					HashMap <String,String>response = new HashMap<String,String>();
+					response.put("cmd", "RECEIVEMESSAGE");
+					response.put("message", msgb64);
+					recipient.send(Utils.mapToJSON(response));
+				}
 			}
 		} else
 		if (command.equals("REGISTER")) {
@@ -82,6 +90,7 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 			try {
 				HashMap <String,String>response = new HashMap<String,String>();
 				System.out.println("session id sent");
+				response.put("cmd", "SESSION");
 				response.put("session_id", Base64.encodeBase64String(encrypt(device_id, session_id)));
 				node.addDevice(device_id, session_id, socket);
 				socket.send(Utils.mapToJSON(response));
@@ -114,18 +123,13 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 	}
 
 	private byte[] encrypt(String key, String message) throws IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
-		ByteBuffer buffer = ByteBuffer.allocate(128);
 		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(
 				new X509EncodedKeySpec(Base64.decodeBase64(key)));
 		Cipher cipher = Cipher
 				.getInstance("RSA");
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 		byte message_bytes[] = message.getBytes(Charset.forName("UTF-8")); 
-		buffer.putInt(message_bytes.length);
-		buffer.put(message_bytes);
-		
-		byte[] result =  OisemsMessage.blockCipher(cipher,buffer.array(),Cipher.ENCRYPT_MODE);
-		return result;
+		return OisemsMessage.blockCipher(cipher,message_bytes,Cipher.ENCRYPT_MODE);
 	}
 	
 	@Override

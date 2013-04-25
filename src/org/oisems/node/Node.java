@@ -7,6 +7,7 @@ import java.util.Random;
 import org.java_websocket.WebSocket;
 import org.oisems.client.Client;
 import org.oisems.client.OisemsClientDevice;
+import org.oisems.node.peer.Discovery;
 
 class DeviceInfo {
 	
@@ -56,6 +57,8 @@ public class Node {
 	long nodeId;
 	
 	HashMap <String, DeviceInfo> deviceList = new HashMap<String, DeviceInfo>();
+	HashMap <WebSocket, String> socketMap = new HashMap<WebSocket, String>();
+	HashMap <Long, Peer> nodePeers = new HashMap<Long,Peer>();
 	
 	public Node() {
 		Random random = new Random();
@@ -70,6 +73,22 @@ public class Node {
 		this.nodeId = nodeId;
 	}
 	
+	public DeviceInfo getDevice(String oisems_id) {
+		return deviceList.get(oisems_id);
+	}
+	
+	public Peer getPeer(long node_id) {
+		return nodePeers.get(node_id);
+	}
+	
+	public void addPeer(long node_id, String address, int port) {
+		Peer peer = new Peer();
+		peer.setNodeId(node_id);
+		peer.setAddress(address);
+		peer.setPort(port);
+		nodePeers.put(node_id, peer);
+	}
+	
 	public void addDevice(String oisems_id, String session_id, WebSocket socket) {
 		DeviceInfo info = new DeviceInfo();
 		info.setOisemsId(oisems_id);
@@ -78,12 +97,27 @@ public class Node {
 		info.setSocket(socket);
 		System.out.println("Device " + info.hash() + " added. with session_id " + session_id);
 		deviceList.put(oisems_id, info);
+		socketMap.put(socket, oisems_id);
+	}
+	
+	public void removeDeviceBySocket(WebSocket socket) {
+		String key = socketMap.get(socket);
+		
+		if (key!=null) {
+			DeviceInfo info = deviceList.get(key);
+			socketMap.remove(socket);
+			System.out.println("Device info " + info.getOisemsId() + " with session " + info.getSessionId() + " removed");
+			deviceList.remove(key);
+		}
 	}
 	
 	public void start() {
 		try {
 			OisemsWebSocketListener listener = new OisemsWebSocketListener(this, 44444);
 			listener.start();
+			System.out.println("starting UDP");
+			Discovery discover = new Discovery(this, 44445);
+			discover.start();
 			System.out.println("waiting for connections");
 			while(true) {
 				try {
