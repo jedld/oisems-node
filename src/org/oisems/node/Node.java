@@ -1,5 +1,6 @@
 package org.oisems.node;
 
+import java.math.BigInteger;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Random;
@@ -54,22 +55,22 @@ class DeviceInfo {
 }
 
 public class Node {
-	long nodeId;
+	BigInteger nodeId;
 	
 	HashMap <String, DeviceInfo> deviceList = new HashMap<String, DeviceInfo>();
 	HashMap <WebSocket, String> socketMap = new HashMap<WebSocket, String>();
-	HashMap <Long, Peer> nodePeers = new HashMap<Long,Peer>();
+	HashMap <BigInteger, Peer> nodePeers = new HashMap<BigInteger,Peer>();
 	
 	public Node() {
 		Random random = new Random();
-		nodeId = random.nextLong();
+		nodeId = new BigInteger(160, random);
 	}
 
-	public long getNodeId() {
+	public BigInteger getNodeId() {
 		return nodeId;
 	}
 
-	public void setNodeId(long nodeId) {
+	public void setNodeId(BigInteger nodeId) {
 		this.nodeId = nodeId;
 	}
 	
@@ -77,11 +78,11 @@ public class Node {
 		return deviceList.get(oisems_id);
 	}
 	
-	public Peer getPeer(long node_id) {
+	public Peer getPeer(BigInteger node_id) {
 		return nodePeers.get(node_id);
 	}
 	
-	public void addPeer(long node_id, String address, int port) {
+	public void addPeer(BigInteger node_id, String address, int port) {
 		Peer peer = new Peer();
 		peer.setNodeId(node_id);
 		peer.setAddress(address);

@@ -1,6 +1,7 @@
 package org.oisems.node.peer;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -42,7 +43,7 @@ public class Discovery extends Thread {
 			socket.joinGroup(group);
 
 			HashMap <String, String>response = new HashMap<String, String>();
-			response.put("node_id", Long.toString(node.getNodeId()));
+			response.put("node_id", node.getNodeId().toString());
 			response.put("address", ip_address);
 			response.put("port", Integer.toString(port));
 			String json_string = Utils.mapToJSON(response);
@@ -64,7 +65,7 @@ public class Discovery extends Thread {
 			    System.out.println("received = [" + received + "]");
 			    JsonParser parser = new JsonParser();
 			    JsonObject peerData = parser.parse(received).getAsJsonObject();
-			    long node_id = peerData.get("node_id").getAsLong();
+			    BigInteger node_id = peerData.get("node_id").getAsBigInteger();
 			    String address = peerData.get("address").getAsString();
 			    int port = peerData.get("port").getAsInt();
 			    Peer p = node.getPeer(node_id);

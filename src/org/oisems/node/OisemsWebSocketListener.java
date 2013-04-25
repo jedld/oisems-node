@@ -1,5 +1,6 @@
 package org.oisems.node;
 
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -92,6 +93,8 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 				System.out.println("session id sent");
 				response.put("cmd", "SESSION");
 				response.put("session_id", Base64.encodeBase64String(encrypt(device_id, session_id)));
+				response.put("domain", "public");
+				response.put("node_id", node.getNodeId().toString());
 				node.addDevice(device_id, session_id, socket);
 				socket.send(Utils.mapToJSON(response));
 			} catch (NotYetConnectedException e) {
@@ -137,7 +140,7 @@ public class OisemsWebSocketListener  extends WebSocketServer {
 		System.out.println("Device connected");
 		HashMap <String,String>response = new HashMap<String,String>();
 		response.put("version", "1");
-		response.put("node_id", Long.toString(node.getNodeId()));
+		response.put("node_id", node.getNodeId().toString());
 		
 		System.out.println("device_id = " + handshake.getFieldValue("device_id"));
 		String responseString = Utils.mapToJSON(response);

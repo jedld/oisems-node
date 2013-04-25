@@ -1,15 +1,17 @@
 package org.oisems.node;
 
+import java.math.BigInteger;
+
 public class Peer {
 
-	long nodeId;
+	BigInteger nodeId;
 	String address;
 	int port;
 	
-	public long getNodeId() {
+	public BigInteger getNodeId() {
 		return nodeId;
 	}
-	public void setNodeId(long nodeId) {
+	public void setNodeId(BigInteger nodeId) {
 		this.nodeId = nodeId;
 	}
 	public String getAddress() {
