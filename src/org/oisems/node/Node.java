@@ -112,14 +112,14 @@ public class Node {
 		}
 	}
 	
-	public void start() {
+	public void start(int receive_port, int broadcast_port) {
 		try {
-			OisemsWebSocketListener listener = new OisemsWebSocketListener(this, 44444);
+			OisemsWebSocketListener listener = new OisemsWebSocketListener(this, receive_port);
 			listener.start();
-			System.out.println("starting UDP");
-			Discovery discover = new Discovery(this, 44445);
+			System.out.println("starting UDP on " + broadcast_port);
+			Discovery discover = new Discovery(this, broadcast_port);
 			discover.start();
-			System.out.println("waiting for connections");
+			System.out.println("waiting for connections on " + receive_port);
 			while(true) {
 				try {
 					Thread.sleep(1000, 0);

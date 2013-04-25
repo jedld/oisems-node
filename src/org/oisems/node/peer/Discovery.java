@@ -1,6 +1,7 @@
 package org.oisems.node.peer;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -64,7 +65,8 @@ public class Discovery extends Thread {
 			    String received = new String(packet.getData());
 			    System.out.println("received = [" + received + "]");
 			    JsonParser parser = new JsonParser();
-			    JsonObject peerData = parser.parse(received).getAsJsonObject();
+			    JsonReader reader = new JsonReader(new StringReader(received));
+			    JsonObject peerData = parser.parse(reader).getAsJsonObject();
 			    BigInteger node_id = peerData.get("node_id").getAsBigInteger();
 			    String address = peerData.get("address").getAsString();
 			    int port = peerData.get("port").getAsInt();

@@ -6,5 +6,6 @@
 	<classpathentry exported="true" kind="lib" path="/home/dev/workspace/oisems-node/lib/java_websocket.jar"/>
 	<classpathentry exported="true" kind="lib" path="/home/dev/workspace/oisems-client/oisems.jar"/>
 	<classpathentry kind="lib" path="/home/dev/workspace/oisems-client/lib/commons-codec-1.7.jar"/>
+	<classpathentry kind="lib" path="/home/dev/workspace/oisems-node/lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
